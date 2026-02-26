@@ -5,9 +5,13 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixpkgs-lib.url = "github:NixOS/nixpkgs/nixpkgs-unstable?dir=lib";
     systems.url = "github:nix-systems/default";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-lib, systems, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-lib, systems, rust-overlay, ... }:
     let
       lib = import nixpkgs-lib;
       defaultSystems = import systems;
@@ -36,22 +40,27 @@
       in tmpls // { default = tmpls.basic; };
     } // {
       packages = eachSystem (system: let
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ (import rust-overlay) ];
+        };
         nixspace = pkgs.callPackage ./. { };
       in {
         inherit nixspace;
         default = nixspace;
       });
       devShells = eachSystem (system: let
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ (import rust-overlay) ];
+        };
+        rustToolchain = pkgs.rust-bin.stable.latest.default;
       in {
         default = pkgs.mkShell {
-          packages = with pkgs; [
-            cargo
-            rustc
-            cargo-watch
-            cargo-insta
-            clippy
+          packages = [
+            rustToolchain
+            pkgs.cargo-watch
+            pkgs.cargo-insta
           ];
         };
       });
