@@ -1,7 +1,6 @@
 {
   self,
   lib,
-  revInfo,
 }:
 rec {
   callFlake = import ./call-flake.nix;
@@ -11,5 +10,4 @@ rec {
   mkWorkspace = import ./mk-workspace.nix {
     inherit self lib callFlake mkWorkspaceEnv;
   };
-  inherit revInfo;
 }

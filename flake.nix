@@ -24,10 +24,6 @@
         lib = import ./lib {
           self = inputs.self;
           lib = inputs.nixpkgs.lib;
-          revInfo =
-            if inputs.nixpkgs ? rev
-            then " (nixpkgs.rev: ${inputs.nixpkgs.rev})"
-            else "";
         };
         templates = let
           tmpls = {
